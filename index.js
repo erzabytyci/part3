@@ -23,23 +23,29 @@ app.get('/api/persons', (request, response, next) => {
     .catch(error => next(error));
 })
 
-app.get('/info', (request, response) => {
-    const entries = people.length
-    const currentTime = new Date()
+app.get('/info', (request, response, next) => {
+    Person.countDocuments({})
+      .then(count => {
+        const info = `
+          <p>Phonebook has info for ${count} people</p>
+          <p>${new Date()}</p>
+        `
+        response.send(info)
+      })
+      .catch(error => next(error))
+  })
+  
 
-response.send(`<p>Phonebook has info for ${entries} people</p>
-                <p>${currentTime}</p>`)
-})
-
-app.get('/api/persons/:id', (request, respone) => {
-    const id = request.params.id
-    const person = people.find(person => person.id === id)
-
-    if(!person) {
-        return respone.status(404).send({error: 'Person not found'})
-    }
-
-    respone.json(person)
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+      .then(person => {
+        if (person) {
+          response.json(person)
+        } else {
+          response.status(404).end()
+        }
+      })
+      .catch(error => next(error)) 
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -88,7 +94,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         })
       })
       .catch(error => next(error))
-  })
+})
   
 
 const errorHandler = (error, request, response, next) => {
