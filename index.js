@@ -45,17 +45,12 @@ app.get('/api/persons/:id', (request, respone) => {
     respone.json(person)
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const person = people.find(p => p.id === id)
-
-    if (!person) {
-      return response.status(404).send({ error: 'Person not found' })
-    }
-
-    people = people.filter(person => person.id !== id)
-
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndDelete(request.params.id)
+    .then(() => {
+        response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 
@@ -66,15 +61,10 @@ app.post('/api/persons', (request, response, next) => {
         return response.status(400).json({error: 'name or number is missing'})
     }
 
-    // const nameExist = people.some(person => person.name === body.name)
-    // if(nameExist) {
-    //     return response.status(400).json({error: 'name must be unique'})
-    // }
 
     const person = new Person({
         name: body.name,
         number: body.number,
-        // id: Math.floor(Math.random() * 1000000).toString(),
     })
 
     person.save()
@@ -82,10 +72,6 @@ app.post('/api/persons', (request, response, next) => {
       response.json(savedPerson)
     })
     .catch(error => next(error))
-
-    // people = people.concat(person)
-
-    // response.json(person)
 })
 
 const PORT = process.env.PORT || 3001
