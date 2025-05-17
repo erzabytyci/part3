@@ -4,10 +4,11 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const path = require('path')
 
 app.use(cors())
-app.use(express.static('dist'))
 app.use(express.json())
+app.use(express.static('dist'))
 
 morgan.token('body', (req) => {
     return req.method === 'POST' ? JSON.stringify(req.body) : ''
@@ -94,6 +95,9 @@ app.put('/api/persons/:id', (request, response, next) => {
       .catch(error => next(error))
 })
   
+app.get(/^\/(?!api).*/, (request, response) => {
+    response.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
+  })
 
 const errorHandler = (error, request, response, next) => {
     console.error(error.name, error.message)
