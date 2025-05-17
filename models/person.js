@@ -7,10 +7,17 @@ mongoose.connect(url)
   .then(() => console.log('Connected to MongoDB'))
   .catch(error => console.error('Error connecting to MongoDB:', error.message))
 
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
+  const personSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      minlength: [3, 'Name must be at least 3 characters long'],
+      required: [true, 'Name is required'],
+    },
+    number: {
+      type: String,
+      required: [true, 'Number is required'],
+    },
+  })
 
 personSchema.set('toJSON', {
   transform: (document, returnedObject) => {
